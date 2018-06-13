@@ -1,6 +1,5 @@
 import Foundation
 import NIOSidekiq
-import NIO
 import Service
 
 public protocol VaporSidekiqWorker: NIOSidekiqWorker {
@@ -13,16 +12,26 @@ extension VaporSidekiqWorker {
     }
 
     public static func performAsync(_ args: Self.Args, queue: SidekiqQueue?, retry: Int?, on container: Container) throws -> EventLoopFuture<SidekiqUnitOfWorkValue> {
-        let workValue = SidekiqUnitOfWorkValue(
-            worker: self,
-            queue: (queue ?? defaultQueue),
-            args: try args.toValueArgs(),
-            retry: (retry ?? defaultRetry)
-        )
+        return try self.performAsync([args], queue: queue, retry: retry, on: container).map(to: SidekiqUnitOfWorkValue.self) { workValues in
+            return workValues.first!
+        }
+    }
+
+    public static func performAsync(_ argsArray: [Self.Args], queue: SidekiqQueue?, retry: Int?, on container: Container) throws -> EventLoopFuture<[SidekiqUnitOfWorkValue]> {
+        var workValues: [SidekiqUnitOfWorkValue] = []
+        for args in argsArray {
+            let workValue = SidekiqUnitOfWorkValue(
+                worker: self,
+                queue: (queue ?? defaultQueue),
+                args: try args.toValueArgs(),
+                retry: (retry ?? defaultRetry)
+            )
+            workValues.append(workValue)
+        }
 
         let m = VaporSidekiq(container: container)
-        return try m.client.enqueue(workValue: workValue).map(to: SidekiqUnitOfWorkValue.self) {
-            return workValue
+        return try m.client.enqueue(workValues: workValues).map(to: [SidekiqUnitOfWorkValue].self) {
+            return workValues
         }
     }
 }

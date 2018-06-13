@@ -1,6 +1,5 @@
 import Foundation
 import NIOSidekiq
-import NIO
 import Redis
 
 public final class VaporSidekiqRedis: NIOSidekiqRedis {

@@ -14,6 +14,16 @@ public final class SidekiqQueue {
     }
 }
 
+extension SidekiqQueue: Hashable {
+    public var hashValue: Int {
+        return name.hashValue
+    }
+
+    public static func == (lhs: SidekiqQueue, rhs: SidekiqQueue) -> Bool {
+        return lhs.name == rhs.name
+    }
+}
+
 extension SidekiqQueue: CustomStringConvertible {
     public var description: String {
         return "{name: \(self.name), weight: \(self.weight)}"

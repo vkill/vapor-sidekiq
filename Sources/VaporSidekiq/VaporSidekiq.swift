@@ -1,6 +1,5 @@
 import Foundation
 import NIOSidekiq
-import NIO
 import Service
 
 public final class VaporSidekiq: NIOSidekiq {
