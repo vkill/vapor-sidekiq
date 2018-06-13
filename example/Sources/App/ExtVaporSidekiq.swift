@@ -1,6 +1,7 @@
 import Vapor
 import NIOSidekiq
 
+///
 import Logging
 extension SidekiqLoggerLevel {
     var vaporLoggingLogLevel: LogLevel {
@@ -18,25 +19,8 @@ public final class SidekiqVaporLogger: SidekiqLogger {
     }
 }
 
-public class MyNIOSidekiqProcessorDispatch: NIOSidekiqProcessorDispatch {
-    let container: Container
-
-    public init(on container: Container) {
-        self.container = container
-    }
-
-    public func executeJob(workValue: SidekiqUnitOfWorkValue) throws -> EventLoopFuture<Void> {
-        switch workValue.workerName {
-        case "EchoWorker":
-            return try self.executeJob(instance: EchoWorker(on: container), workValue: workValue)
-        default:
-            throw NIOSidekiqProcessorDispatchErrors.UnknowWorkerName
-        }
-    }
-}
-
 /*
-
+///
 import SwiftyBeaverProvider
 public final class SidekiqSwiftyBeaverLogger: SidekiqLogger {
     let swiftyBeaverLogger: SwiftyBeaverLogger

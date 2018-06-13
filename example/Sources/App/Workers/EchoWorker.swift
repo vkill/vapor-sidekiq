@@ -18,6 +18,6 @@ final class EchoWorker: AppWorker, VaporSidekiqWorker {
     }
 
     func perform(_ args: Args) throws -> Future<Void> {
-        return Future.map(on: self.container){ print("echo \(args.message)") }
+        return Future.map(on: self.container){ print("\(args.message)") }
     }
 }
