@@ -10,10 +10,10 @@ public protocol NIOSidekiqWorker: AnyObject {
 }
 
 extension NIOSidekiqWorker {
-    public static var defaultQueue: SidekiqQueue {
-        return SidekiqQueue.default()
+    public static var queueDefault: SidekiqQueue {
+        return SidekiqUnitOfWorkValue.queueDefault
     }
-    public static var defaultRetry: Int {
-        return 3
+    public static var retryDefault: Int {
+        return SidekiqUnitOfWorkValue.retryDefault
     }
 }

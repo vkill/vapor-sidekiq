@@ -5,6 +5,9 @@ public typealias SidekiqUnitOfWorkValueArg = LiteAny
 public typealias SidekiqUnitOfWorkValueArgs = [SidekiqUnitOfWorkValueArg]
 
 public struct SidekiqUnitOfWorkValue: Codable {
+    public static let queueDefault = SidekiqQueue.default()
+    public static let retryDefault = 3
+
     public let workerName: String
     public let queueName: String
     public let args: SidekiqUnitOfWorkValueArgs
@@ -24,12 +27,16 @@ public struct SidekiqUnitOfWorkValue: Codable {
     }
 
     public var queue: SidekiqQueue {
-        return SidekiqQueue(name: self.queueName)
+        if self.queueName.isEmpty {
+            return type(of: self).queueDefault
+        } else {
+            return SidekiqQueue(name: self.queueName)
+        }
     }
 
     public var retry: Int {
-        if let _ = try? self._retry.to(Bool?.self) {
-            return 0
+        if let retryBoolValue = try? self._retry.to(Bool?.self) {
+            return retryBoolValue == true ? type(of: self).retryDefault : 0
         } else {
             return try! self._retry.to(Int.self)
         }

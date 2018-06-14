@@ -22,9 +22,9 @@ extension VaporSidekiqWorker {
         for args in argsArray {
             let workValue = SidekiqUnitOfWorkValue(
                 worker: self,
-                queue: (queue ?? defaultQueue),
+                queue: (queue ?? queueDefault),
                 args: try args.toValueArgs(),
-                retry: (retry ?? defaultRetry)
+                retry: (retry ?? retryDefault)
             )
             workValues.append(workValue)
         }
