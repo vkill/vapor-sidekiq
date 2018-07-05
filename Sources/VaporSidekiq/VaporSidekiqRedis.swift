@@ -59,7 +59,7 @@ extension RedisClient {
 
     public func sadd(_ members: [RedisData], to set: String) -> Future<Int> {
         var args: [RedisData] = members
-        args.insert(RedisData(stringLiteral: set), at: 0)
+        args.insert(RedisData(bulk: set), at: 0)
         return command("SADD", args).map { data in
             guard let value = data.int else {
                 throw RedisError(identifier: "sadd", reason: "Could not convert resp to int", source: .capture())
