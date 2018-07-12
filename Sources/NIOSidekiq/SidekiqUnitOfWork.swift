@@ -47,7 +47,7 @@ public struct SidekiqUnitOfWorkValue: Codable {
         self.queueName = queue.name
         self.args = args
         self._retry = SidekiqUnitOfWorkValueArg.int(retry)
-        self.jid = String(SidekiqUtils.random(24))
+        self.jid = UUID().uuidString
         self.created_at = Date().timeIntervalSince1970
         self.enqueued_at = Date().timeIntervalSince1970
     }
