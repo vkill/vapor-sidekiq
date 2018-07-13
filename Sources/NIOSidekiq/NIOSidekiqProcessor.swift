@@ -63,10 +63,11 @@ public final class NIOSidekiqProcessor {
         self.fetcher.processor = self
 
         self.m.logger.info("\(self) starting.")
-        let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(0), self.run)
+        // let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(0), self.run)
+        return self.run()
     }
 
-    private func run() throws {
+    private func run() {
         self.m.logger.info("\(self) running.")
 
         guard let manager = self.manager else {
@@ -76,7 +77,8 @@ public final class NIOSidekiqProcessor {
         do {
             try processOne().do { tuple in
                 if self.done.load() == false {
-                    let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(self.options.runInterval), self.run)
+                    return self.run()
+                    // let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(self.options.runInterval), self.run)
                 } else {
                     manager.processorStopped(processor: self)
                 }

@@ -39,9 +39,10 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
                     }
                 }
 
-                return try redis.rpoplpush(
+                return try redis.brpoplpush(
                     source: key,
-                    destination: keyInprogress
+                    destination: keyInprogress,
+                    timeout: 0
                     ).map(to: SidekiqUnitOfWork?.self) { rpoplpushData in
                         if let data = rpoplpushData {
                             return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
