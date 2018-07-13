@@ -7,15 +7,18 @@ public struct SidekiqProcessorOptions {
     public let queues: [SidekiqQueue]
     public let fetcherType: NIOSidekiqFetcher.Type
     public let dispatch: NIOSidekiqProcessorDispatch
+    public let runInterval: Int
 
     public init(
         queues: [SidekiqQueue] = [SidekiqQueue.default()],
         fetcherType: NIOSidekiqFetcher.Type = NIOSidekiqReliableFetcher.self,
-        dispatch: NIOSidekiqProcessorDispatch
+        dispatch: NIOSidekiqProcessorDispatch,
+        runInterval: Int = 5
     ) {
         self.queues = queues
         self.fetcherType = fetcherType
         self.dispatch = dispatch
+        self.runInterval = runInterval
     }
 }
 
@@ -65,13 +68,17 @@ public final class NIOSidekiqProcessor {
 
     private func run() throws {
         self.m.logger.info("\(self) running.")
-        try processOne().do { tuple in
-            if self.done.load() == false {
-                let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(5), self.run)
-            } else {
-                self.manager?.processorStopped(processor: self)
+        do {
+            try processOne().do { tuple in
+                if self.done.load() == false {
+                    let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(self.options.runInterval), self.run)
+                } else {
+                    self.manager?.processorStopped(processor: self)
+                }
+            }.catch{ error in
+                self.manager?.processorDied(processor: self, reason: error.localizedDescription)
             }
-        }.catch{ error in
+        } catch {
             self.manager?.processorDied(processor: self, reason: error.localizedDescription)
         }
     }

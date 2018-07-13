@@ -46,15 +46,25 @@ public final class NIOSidekiqManager {
     }
 
     func processorStopped(processor: NIOSidekiqProcessor) {
-        self.m.logger.debug("\(processor) stopped.")
+        self.m.logger.error("\(processor) stopped.")
 
         if let index = self.processors.index(of: processor) {
             self.processors.remove(at: index)
         }
+        if done.load() == false {
+            let processor = NIOSidekiqProcessor(
+                m: m,
+                index: processor.index,
+                options: processor.options
+            )
+            processor.manager = self
+            self.processors.append(processor)
+            processor.start()
+        }
     }
 
     func processorDied(processor: NIOSidekiqProcessor, reason: String) {
-        self.m.logger.debug("\(processor) died. reason: \(reason)")
+        self.m.logger.error("\(processor) died. reason: \(reason)")
 
         if let index = self.processors.index(of: processor) {
             self.processors.remove(at: index)
