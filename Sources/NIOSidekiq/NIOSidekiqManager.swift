@@ -51,16 +51,6 @@ public final class NIOSidekiqManager {
         if let index = self.processors.index(of: processor) {
             self.processors.remove(at: index)
         }
-        if done.load() == false {
-            let processor = NIOSidekiqProcessor(
-                m: m,
-                index: processor.index,
-                options: processor.options
-            )
-            processor.manager = self
-            self.processors.append(processor)
-            processor.start()
-        }
     }
 
     func processorDied(processor: NIOSidekiqProcessor, reason: String) {
@@ -70,14 +60,16 @@ public final class NIOSidekiqManager {
             self.processors.remove(at: index)
         }
         if done.load() == false {
-            let processor = NIOSidekiqProcessor(
-                m: m,
-                index: processor.index,
-                options: processor.options
-            )
-            processor.manager = self
-            self.processors.append(processor)
-            processor.start()
+            let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(5)) {
+                let processor = NIOSidekiqProcessor(
+                    m: self.m,
+                    index: processor.index,
+                    options: processor.options
+                )
+                processor.manager = self
+                self.processors.append(processor)
+                processor.start()
+            }
         }
     }
 }
