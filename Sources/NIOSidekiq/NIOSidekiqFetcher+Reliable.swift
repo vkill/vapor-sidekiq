@@ -35,7 +35,7 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
             ).flatMap(to: SidekiqUnitOfWork?.self) { lrangeDataArray in
                 if let data = lrangeDataArray.first {
                     return self.m.EventLoopFutureMap() {
-                        try SidekiqUnitOfWork.init(queue: queue, valueData: data)
+                        return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
                     }
                 }
 
