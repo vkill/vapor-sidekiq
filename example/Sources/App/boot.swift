@@ -2,6 +2,8 @@ import Vapor
 import NIOSidekiq
 import VaporSidekiq
 
+var sidekiqManager: NIOSidekiqManager? = nil
+
 public func boot(_ app: Application) throws {
     ///
     func runRepeatTimer() throws {
@@ -17,12 +19,12 @@ public func boot(_ app: Application) throws {
     let sidekiqProcessorOptions = SidekiqProcessorOptions(
         dispatch: MyNIOSidekiqProcessorDispatch(on: app)
     )
-    let sidekiqManager = NIOSidekiqManager(
+    sidekiqManager = NIOSidekiqManager(
         m: sidekiq,
         concurrency: 1,
         processorOptions: sidekiqProcessorOptions
     )
-    sidekiqManager.start()
+    sidekiqManager!.start()
 }
 
 public class MyNIOSidekiqProcessorDispatch: NIOSidekiqProcessorDispatch {
