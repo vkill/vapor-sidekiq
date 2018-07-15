@@ -61,6 +61,7 @@ public final class NIOSidekiqProcessor {
 
         self.m.logger.info("\(self) starting.")
         return self.run()
+//        let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(0), self.run)
     }
 
     private func run() {
@@ -74,14 +75,19 @@ public final class NIOSidekiqProcessor {
             try processOne().do { tuple in
                 if self.done.load() == false {
                     return self.run()
+//                    let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(0), self.run)
                 } else {
                     manager.processorStopped(processor: self)
                 }
             }.catch{ error in
-                manager.processorDied(processor: self, reason: error.localizedDescription)
+                let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(5)) {
+                    manager.processorDied(processor: self, reason: error.localizedDescription)
+                }
             }
         } catch {
-            manager.processorDied(processor: self, reason: error.localizedDescription)
+            let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(5)) {
+                manager.processorDied(processor: self, reason: error.localizedDescription)
+            }
         }
     }
 

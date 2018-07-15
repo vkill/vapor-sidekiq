@@ -13,7 +13,7 @@ public final class VaporSidekiqRedis: NIOSidekiqRedis {
 
     //
     public func brpoplpush(source: String, destination: String, timeout: Int = 0) throws -> Future<Data?> {
-        return container.withNewConnection(to: .redis) { client in
+        return container.withPooledConnection(to: .redis) { client in
             return client.brpoplpush(source: source, destination: destination, timeout: timeout).map(to: Data?.self) { redisData in
                 return redisData.data
             }
