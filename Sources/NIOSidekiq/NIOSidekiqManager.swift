@@ -60,16 +60,14 @@ public final class NIOSidekiqManager {
             self.processors.remove(at: index)
         }
         if done.load() == false {
-            let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(5)) {
-                let processor = NIOSidekiqProcessor(
-                    m: self.m,
-                    index: processor.index,
-                    options: processor.options
-                )
-                processor.manager = self
-                self.processors.append(processor)
-                processor.start()
-            }
+            let processor = NIOSidekiqProcessor(
+                m: self.m,
+                index: processor.index,
+                options: processor.options
+            )
+            processor.manager = self
+            self.processors.append(processor)
+            processor.start()
         }
     }
 }

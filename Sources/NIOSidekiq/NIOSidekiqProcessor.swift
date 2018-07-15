@@ -7,18 +7,15 @@ public struct SidekiqProcessorOptions {
     public let queues: [SidekiqQueue]
     public let fetcherType: NIOSidekiqFetcher.Type
     public let dispatch: NIOSidekiqProcessorDispatch
-    public let runInterval: Int
 
     public init(
         queues: [SidekiqQueue] = [SidekiqQueue.default()],
         fetcherType: NIOSidekiqFetcher.Type = NIOSidekiqReliableFetcher.self,
-        dispatch: NIOSidekiqProcessorDispatch,
-        runInterval: Int = 5
+        dispatch: NIOSidekiqProcessorDispatch
     ) {
         self.queues = queues
         self.fetcherType = fetcherType
         self.dispatch = dispatch
-        self.runInterval = runInterval
     }
 }
 
@@ -63,7 +60,6 @@ public final class NIOSidekiqProcessor {
         self.fetcher.processor = self
 
         self.m.logger.info("\(self) starting.")
-        // let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(0), self.run)
         return self.run()
     }
 
@@ -78,7 +74,6 @@ public final class NIOSidekiqProcessor {
             try processOne().do { tuple in
                 if self.done.load() == false {
                     return self.run()
-                    // let _ = self.m.eventLoop.scheduleTask(in: TimeAmount.seconds(self.options.runInterval), self.run)
                 } else {
                     manager.processorStopped(processor: self)
                 }
