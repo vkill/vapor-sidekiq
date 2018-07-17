@@ -21,6 +21,10 @@ public final class VaporSidekiq: NIOSidekiq {
         return VaporSidekiqRedis(m: self, container: container)
     }()
 
+    public func makeRedis() -> NIOSidekiqRedis {
+        return VaporSidekiqRedis(m: self, container: container)
+    }
+
     public lazy var rediskey: SidekiqRedisKey = {
         return SidekiqRedisKey()
     }()

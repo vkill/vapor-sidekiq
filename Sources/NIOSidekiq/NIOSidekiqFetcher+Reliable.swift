@@ -9,6 +9,10 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
 
     weak public var processor: NIOSidekiqProcessor?
 
+    public lazy var mRedis: NIOSidekiqRedis = {
+        return m.makeRedis()
+    }()
+
     private let nextQueueIndex = Atomic<Int>(value: 0)
     private func nextQueue() -> SidekiqQueue {
         return queues[abs(nextQueueIndex.add(1) % queues.count)]
@@ -32,24 +36,24 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
             key: keyInprogress,
             start: 0,
             stop: 1
-            ).flatMap(to: SidekiqUnitOfWork?.self) { lrangeDataArray in
-                if let data = lrangeDataArray.first {
-                    return self.m.EventLoopFutureMap() {
-                        return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
-                    }
+        ).flatMap(to: SidekiqUnitOfWork?.self) { lrangeDataArray in
+            if let data = lrangeDataArray.first {
+                return self.m.EventLoopFutureMap() {
+                    return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
                 }
+            }
 
-                return try redis.brpoplpush(
-                    source: key,
-                    destination: keyInprogress,
-                    timeout: 0
-                    ).map(to: SidekiqUnitOfWork?.self) { rpoplpushData in
-                        if let data = rpoplpushData {
-                            return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
-                        } else {
-                            return nil
-                        }
+            return try self.mRedis.brpoplpush(
+                source: key,
+                destination: keyInprogress,
+                timeout: 0
+            ).map(to: SidekiqUnitOfWork?.self) { rpoplpushData in
+                if let data = rpoplpushData {
+                    return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
+                } else {
+                    return nil
                 }
+            }
         }
     }
 

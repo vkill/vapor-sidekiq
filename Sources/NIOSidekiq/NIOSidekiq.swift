@@ -11,6 +11,7 @@ public protocol NIOSidekiq: AnyObject {
 
     var client: NIOSidekiqClient { get }
 
+    func makeRedis() -> NIOSidekiqRedis
     func EventLoopFutureMap<T>(_ callback: @escaping () throws -> T) -> EventLoopFuture<T>
 }
 

@@ -13,7 +13,11 @@ public final class VaporSidekiqRedis: NIOSidekiqRedis {
 
     //
     public func brpoplpush(source: String, destination: String, timeout: Int = 0) throws -> Future<Data?> {
-        return container.withPooledConnection(to: .redis) { client in
+        return fetchFutureClient().flatMap(to: Data?.self) { client in
+            if client.isClosed {
+                let _ = self.makeFutureClient()
+                return try self.brpoplpush(source: source, destination: destination, timeout: timeout)
+            }
             return client.brpoplpush(source: source, destination: destination, timeout: timeout).map(to: Data?.self) { redisData in
                 return redisData.data
             }
@@ -56,6 +60,23 @@ public final class VaporSidekiqRedis: NIOSidekiqRedis {
         return container.withPooledConnection(to: .redis) { client in
             return client.lpush(values.map{ RedisData.bulkString($0) }, into: key)
         }
+    }
+
+
+    //
+    private var futureClient: Future<RedisClient>?
+
+    private func fetchFutureClient() -> Future<RedisClient> {
+        if let futureClient = self.futureClient {
+            return futureClient
+        }
+        return makeFutureClient()
+    }
+
+    private func makeFutureClient() -> Future<RedisClient> {
+        let futureClient = self.container.newConnection(to: .redis)
+        self.futureClient = futureClient
+        return futureClient
     }
 }
 
