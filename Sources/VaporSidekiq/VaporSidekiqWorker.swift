@@ -13,7 +13,10 @@ extension VaporSidekiqWorker {
 
     public static func performAsync(_ args: Self.Args, queue: SidekiqQueue?, retry: Int?, on container: Container) throws -> EventLoopFuture<SidekiqUnitOfWorkValue> {
         return try self.performAsync([args], queue: queue, retry: retry, on: container).map(to: SidekiqUnitOfWorkValue.self) { workValues in
-            return workValues.first!
+            guard let workValue = workValues.first else {
+                fatalError("workValues is empty")
+            }
+            return workValue
         }
     }
 

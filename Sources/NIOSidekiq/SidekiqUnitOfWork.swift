@@ -78,7 +78,7 @@ public class SidekiqUnitOfWork {
 extension SidekiqUnitOfWork: CustomStringConvertible {
     public var description: String {
         return """
-        <SidekiqUnitOfWork queue="\(queue)" valueData='\(String(data: valueData, encoding: .utf8)!)'>
+        <SidekiqUnitOfWork queue="\(queue)" valueData='\(String(data: valueData, encoding: .utf8) ?? "")'>
         """
     }
 }

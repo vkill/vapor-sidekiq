@@ -21,28 +21,34 @@ public struct SidekiqProcessorOptions {
 
 public final class NIOSidekiqProcessor {
     private var m: NIOSidekiq
+
+    public let managerIdentity: String
     public let index: Int
+    public let identity: String
+
     public let options: SidekiqProcessorOptions
     private let fetcher: NIOSidekiqFetcher
     private let dispatch: NIOSidekiqProcessorDispatch
 
     weak var manager: NIOSidekiqManager?
 
-    public lazy var identity: String = {
-        return "\(self.manager!.identity):\(index)"
-    }()
-
     private let done = Atomic<Bool>(value: false)
 
     public init(
         m: NIOSidekiq,
+        managerIdentity: String,
         index: Int,
         options: SidekiqProcessorOptions
     ) {
         self.m = m
+
+        self.managerIdentity = managerIdentity
         self.index = index
+        let identity = "\(managerIdentity):\(index)"
+        self.identity = identity
+
         self.options = options
-        self.fetcher = options.fetcherType.init(m: m, queues: options.queues)
+        self.fetcher = options.fetcherType.init(m: m, queues: options.queues, processorIdentity: identity)
         self.dispatch = options.dispatch
     }
 

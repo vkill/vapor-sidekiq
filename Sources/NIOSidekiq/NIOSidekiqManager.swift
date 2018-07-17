@@ -8,14 +8,11 @@ public final class NIOSidekiqManager {
     private let concurrency: Int
 
     private let index: Int
-    private let nextIndex = Atomic<Int>(value: 0)
+    private static let nextIndex = Atomic<Int>(value: 1)
+    public let identity: String
 
     private(set) var processors: [NIOSidekiqProcessor]
     private let done = Atomic<Bool>(value: false)
-
-    public lazy var identity: String = {
-        return "\(index)"
-    }()
 
     public init(
         m: NIOSidekiq,
@@ -25,12 +22,15 @@ public final class NIOSidekiqManager {
         self.m = m
         self.concurrency = concurrency
 
-        let managerIndex = nextIndex.add(1)
+        let managerIndex = type(of: self).nextIndex.add(1)
         self.index = managerIndex
+        let identity = String(managerIndex)
+        self.identity = identity
 
         self.processors = (1...concurrency).map { processorIndex in
             return NIOSidekiqProcessor(
                 m: m,
+                managerIdentity: identity,
                 index: processorIndex,
                 options: processorOptions
             )
@@ -62,6 +62,7 @@ public final class NIOSidekiqManager {
         if done.load() == false {
             let processor = NIOSidekiqProcessor(
                 m: self.m,
+                managerIdentity: self.identity,
                 index: processor.index,
                 options: processor.options
             )

@@ -35,7 +35,10 @@ public final class NIOSidekiqClient {
             key: redisKey.queues(),
             members: [queue.name]
         ).flatMap(to: Void.self) { saddInt in
-            let values = workValues.map { try! JSONEncoder().encode($0) }
+            var values: [Data] = []
+            for workValue in workValues {
+                values.append(try JSONEncoder().encode(workValue))
+            }
             return try redis.lpush(
                 key: redisKey.queue(queue: queue),
                 values: values

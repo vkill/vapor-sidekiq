@@ -8,6 +8,7 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
     private let queues: [SidekiqQueue]
 
     weak public var processor: NIOSidekiqProcessor?
+    public let processorIdentity: String
 
     public lazy var mRedis: NIOSidekiqRedis = {
         return m.makeRedis()
@@ -18,9 +19,10 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
         return queues[abs(nextQueueIndex.add(1) % queues.count)]
     }
 
-    public init(m: NIOSidekiq, queues: [SidekiqQueue]) {
+    public init(m: NIOSidekiq, queues: [SidekiqQueue], processorIdentity: String) {
         self.m = m
         self.queues = queues
+        self.processorIdentity = processorIdentity
     }
 
     public func retriveWork() throws -> EventLoopFuture<SidekiqUnitOfWork?> {
@@ -30,7 +32,7 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
         let queue = nextQueue()
 
         let key = redisKey.queue(queue: queue)
-        let keyInprogress = redisKey.queueInprogress(queue: queue, identity: processor!.identity)
+        let keyInprogress = redisKey.queueInprogress(queue: queue, identity: self.processorIdentity)
 
         return try redis.lrange(
             key: keyInprogress,
@@ -65,7 +67,7 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
         let value = work.valueData
 
         return try redis.lrem(
-            key: redisKey.queueInprogress(queue: queue, identity: self.processor!.identity),
+            key: redisKey.queueInprogress(queue: queue, identity: self.processorIdentity),
             count: -1,
             value: value
         )

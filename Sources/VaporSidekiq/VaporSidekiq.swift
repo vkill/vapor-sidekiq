@@ -18,7 +18,7 @@ public final class VaporSidekiq: NIOSidekiq {
     }
 
     public lazy var redis: NIOSidekiqRedis = {
-        return VaporSidekiqRedis(m: self, container: container)
+        return makeRedis()
     }()
 
     public func makeRedis() -> NIOSidekiqRedis {
