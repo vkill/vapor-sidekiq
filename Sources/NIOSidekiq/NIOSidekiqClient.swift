@@ -1,4 +1,5 @@
-import Foundation
+import struct Foundation.Data
+import class Foundation.JSONEncoder
 import NIO
 import Async //TODO
 

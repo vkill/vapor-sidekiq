@@ -1,4 +1,3 @@
-import Foundation
 import NIO
 
 public protocol NIOSidekiqWorker: AnyObject {

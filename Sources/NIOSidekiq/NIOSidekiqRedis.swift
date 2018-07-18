@@ -1,4 +1,4 @@
-import Foundation
+import struct Foundation.Data
 import NIO
 
 public class SidekiqRedisKey {

@@ -1,4 +1,7 @@
-import Foundation
+import struct Foundation.UUID
+import struct Foundation.Date
+import struct Foundation.Data
+import class Foundation.JSONDecoder
 import LiteAny
 
 public typealias SidekiqUnitOfWorkValueArg = LiteAny

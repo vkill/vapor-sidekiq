@@ -1,4 +1,3 @@
-import Foundation
 import NIOSidekiq
 import Redis
 

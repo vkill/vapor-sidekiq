@@ -1,5 +1,3 @@
-import Foundation
-
 public final class SidekiqQueue {
     public static func `default`() -> SidekiqQueue {
         return SidekiqQueue(name: "default")

@@ -1,5 +1,3 @@
-import Foundation
-
 public enum SidekiqLoggerLevel: ExpressibleByStringLiteral, CustomStringConvertible {
     case verbose
     case debug
