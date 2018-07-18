@@ -38,7 +38,11 @@ public struct SidekiqUnitOfWorkValue: Codable {
         if let retryBoolValue = try? self._retry.to(Bool?.self) {
             return retryBoolValue == true ? type(of: self).retryDefault : 0
         } else {
-            return try! self._retry.to(Int.self)
+            if let retryIntValue = try? self._retry.to(Int.self) {
+                return retryIntValue
+            } else {
+                return type(of: self).retryDefault
+            }
         }
     }
 

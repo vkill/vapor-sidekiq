@@ -42,8 +42,8 @@ public final class NIOSidekiqClient {
             return try redis.lpush(
                 key: redisKey.queue(queue: queue),
                 values: values
-                ).flatMap(to: Void.self) { lpushInt in
-                    return self.m.EventLoopFutureMap(){ () }
+            ).flatMap(to: Void.self) { lpushInt in
+                return self.m.EventLoopFutureMap(){ () }
             }
         }
     }
