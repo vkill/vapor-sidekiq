@@ -21,8 +21,6 @@ public class SidekiqRedisKey {
 }
 
 public protocol NIOSidekiqRedis: AnyObject {
-    var m: NIOSidekiq { get }
-
     func brpoplpush(source: String, destination: String, timeout: Int) throws -> EventLoopFuture<Data?>
     func rpoplpush(source: String, destination: String) throws -> EventLoopFuture<Data?>
     func lrem(key: String, count: Int, value: Data) throws -> EventLoopFuture<Void>

@@ -2,11 +2,9 @@ import NIOSidekiq
 import Redis
 
 public final class VaporSidekiqRedis: NIOSidekiqRedis {
-    public let m: NIOSidekiq
     private let container: Container
 
-    public init(m: NIOSidekiq, container: Container) {
-        self.m = m
+    public init(container: Container) {
         self.container = container
     }
 

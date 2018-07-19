@@ -9,10 +9,12 @@ public enum NIOSidekiqClientEnqueueErrors: Error {
 }
 
 public final class NIOSidekiqClient {
-    private let m: NIOSidekiq
+    private let redis: NIOSidekiqRedis
+    private let redisKey: SidekiqRedisKey
 
-    public init(m: NIOSidekiq) {
-        self.m = m
+    public init(redis: NIOSidekiqRedis, redisKey: SidekiqRedisKey) {
+        self.redis = redis
+        self.redisKey = redisKey
     }
 
     public func enqueue(workValue: SidekiqUnitOfWorkValue) throws -> EventLoopFuture<Void> {
@@ -20,9 +22,6 @@ public final class NIOSidekiqClient {
     }
 
     public func enqueue(workValues: [SidekiqUnitOfWorkValue]) throws -> EventLoopFuture<Void> {
-        let redis = self.m.redis
-        let redisKey = self.m.rediskey
-
         let queueSet = Set<SidekiqQueue>(workValues.map{ $0.queue })
         guard queueSet.count == 1 else {
             throw NIOSidekiqClientEnqueueErrors.manyQueue
@@ -32,20 +31,18 @@ public final class NIOSidekiqClient {
             throw NIOSidekiqClientEnqueueErrors.missingQueue
         }
 
-        return try redis.sadd(
-            key: redisKey.queues(),
+        return try self.redis.sadd(
+            key: self.redisKey.queues(),
             members: [queue.name]
         ).flatMap(to: Void.self) { saddInt in
             var values: [Data] = []
             for workValue in workValues {
                 values.append(try JSONEncoder().encode(workValue))
             }
-            return try redis.lpush(
-                key: redisKey.queue(queue: queue),
+            return try self.redis.lpush(
+                key: self.redisKey.queue(queue: queue),
                 values: values
-            ).flatMap(to: Void.self) { lpushInt in
-                return self.m.EventLoopFutureMap(){ () }
-            }
+            ).transform(to: ())
         }
     }
 
