@@ -8,25 +8,25 @@ public typealias SidekiqUnitOfWorkValueArg = LiteAny
 public typealias SidekiqUnitOfWorkValueArgs = [SidekiqUnitOfWorkValueArg]
 
 public struct SidekiqUnitOfWorkValue: Codable {
-    public static let queueDefault = SidekiqQueue.default()
-    public static let retryDefault = 3
+    public static let queueDefault: SidekiqQueue = SidekiqQueue.default()
+    public static let retryDefault: Int = 3
 
     public let workerName: String
-    public let queueName: String
+    private let queueName: String
     public let args: SidekiqUnitOfWorkValueArgs
-    public let _retry: SidekiqUnitOfWorkValueArg
+    private let retryAny: SidekiqUnitOfWorkValueArg
     public let jid: String
-    public let created_at: Double
-    public let enqueued_at: Double
+    private let createdAtTS: Double
+    private let enqueuedAtTS: Double
 
     enum CodingKeys: String, CodingKey {
         case workerName = "class"
         case queueName = "queue"
         case args
-        case _retry = "retry"
+        case retryAny = "retry"
         case jid
-        case created_at
-        case enqueued_at
+        case createdAtTS = "created_at"
+        case enqueuedAtTS = "enqueued_at"
     }
 
     public var queue: SidekiqQueue {
@@ -38,10 +38,10 @@ public struct SidekiqUnitOfWorkValue: Codable {
     }
 
     public var retry: Int {
-        if let retryBoolValue = try? self._retry.to(Bool?.self) {
+        if let retryBoolValue = try? self.retryAny.to(Bool?.self) {
             return retryBoolValue == true ? type(of: self).retryDefault : 0
         } else {
-            if let retryIntValue = try? self._retry.to(Int.self) {
+            if let retryIntValue = try? self.retryAny.to(Int.self) {
                 return retryIntValue
             } else {
                 return type(of: self).retryDefault
@@ -49,14 +49,24 @@ public struct SidekiqUnitOfWorkValue: Codable {
         }
     }
 
+    public var createdAt: Date {
+        return Date(timeIntervalSince1970: self.createdAtTS)
+    }
+
+    public var enqueuedAt: Date {
+        return Date(timeIntervalSince1970: self.enqueuedAtTS)
+    }
+
     public init<W:NIOSidekiqWorker>(worker: W.Type, queue: SidekiqQueue, args: SidekiqUnitOfWorkValueArgs, retry: Int) {
+        let now = Date()
+
         self.workerName = String(describing: worker)
         self.queueName = queue.name
         self.args = args
-        self._retry = SidekiqUnitOfWorkValueArg.int(retry)
+        self.retryAny = SidekiqUnitOfWorkValueArg.int(retry)
         self.jid = UUID().uuidString
-        self.created_at = Date().timeIntervalSince1970
-        self.enqueued_at = Date().timeIntervalSince1970
+        self.createdAtTS = now.timeIntervalSince1970
+        self.enqueuedAtTS = now.timeIntervalSince1970
     }
 }
 
