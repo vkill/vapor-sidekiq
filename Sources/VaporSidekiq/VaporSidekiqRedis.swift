@@ -92,7 +92,7 @@ extension RedisClient {
         args.insert(RedisData(bulk: set), at: 0)
         return command("SADD", args).map { data in
             guard let value = data.int else {
-                throw RedisError(identifier: "sadd", reason: "Could not convert resp to int", source: .capture())
+                throw RedisError(identifier: "sadd", reason: "Could not convert resp to int")
             }
             return value
         }

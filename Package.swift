@@ -11,7 +11,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
         .package(url: "https://github.com/vapor/core.git", from: "3.0.0"),
-        .package(url: "https://github.com/vapor/redis.git", from: "3.0.0-rc"),
+        .package(url: "https://github.com/vapor/redis.git", from: "3.0.0"),
         .package(url: "https://github.com/vkill/swift-lite-any.git", .branch("master")),
     ],
     targets: [
