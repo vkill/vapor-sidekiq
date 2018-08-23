@@ -37,7 +37,7 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
             key: keyInprogress,
             start: 0,
             stop: 1
-        ).flatMap(to: SidekiqUnitOfWork?.self) { lrangeDataArray in
+        ).flatMap { lrangeDataArray in
             if let data = lrangeDataArray.first {
                 return self.m.EventLoopFutureMap() {
                     return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
@@ -48,7 +48,7 @@ public final class NIOSidekiqReliableFetcher: NIOSidekiqFetcher {
                 source: key,
                 destination: keyInprogress,
                 timeout: 0
-            ).map(to: SidekiqUnitOfWork?.self) { rpoplpushData in
+            ).map { rpoplpushData in
                 if let data = rpoplpushData {
                     return try SidekiqUnitOfWork.init(queue: queue, valueData: data)
                 } else {

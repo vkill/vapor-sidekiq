@@ -91,7 +91,7 @@ public final class NIOSidekiqProcessor {
     }
 
     private func processOne() throws -> EventLoopFuture<Void> {
-        return try self.fetcher.retriveWork().flatMap(to: Void.self) { work in
+        return try self.fetcher.retriveWork().flatMap { work in
             if let work = work {
                 if self.done.load() == true {
                     return try self.fetcher.requeue(work)
@@ -113,7 +113,7 @@ public final class NIOSidekiqProcessor {
 
         self.m.logger.info("\(self) processing \(work).")
 
-        return try self.dispatch.executeJob(workValue: workValue).flatMap(to: Void.self) { _ in
+        return try self.dispatch.executeJob(workValue: workValue).flatMap { _ in
             return try self.fetcher.acknowledge(work)
         }.catchFlatMap{ error in
             let reason = "Run perform error \(error.localizedDescription)"

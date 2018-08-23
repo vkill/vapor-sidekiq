@@ -34,7 +34,7 @@ public final class NIOSidekiqClient {
         return try self.redis.sadd(
             key: self.redisKey.queues(),
             members: [queue.name]
-        ).flatMap(to: Void.self) { saddInt in
+        ).flatMap { saddInt in
             var values: [Data] = []
             for workValue in workValues {
                 values.append(try JSONEncoder().encode(workValue))

@@ -16,7 +16,7 @@ extension VaporSidekiqWorker {
     }
 
     public static func performAsync(_ args: Self.Args, queue: SidekiqQueue?, retry: Int?, on container: Container) throws -> EventLoopFuture<SidekiqUnitOfWorkValue> {
-        return try self.performAsync([args], queue: queue, retry: retry, on: container).map(to: SidekiqUnitOfWorkValue.self) { workValues in
+        return try self.performAsync([args], queue: queue, retry: retry, on: container).map { workValues in
             guard let workValue = workValues.first else {
                 throw VaporSidekiqWorkerErrors.enqueueFailed
             }
@@ -40,9 +40,6 @@ extension VaporSidekiqWorker {
             workValues.append(workValue)
         }
 
-        let m = VaporSidekiq(container: container)
-        return try m.client.enqueue(workValues: workValues).map(to: [SidekiqUnitOfWorkValue].self) {
-            return workValues
-        }
+        return try VaporSidekiq(container: container).client.enqueue(workValues: workValues).transform(to: workValues)
     }
 }
