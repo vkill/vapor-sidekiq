@@ -83,10 +83,10 @@ public final class NIOSidekiqProcessor {
                     manager.processorStopped(processor: self)
                 }
             }.catch{ error in
-                manager.processorDied(processor: self, reason: error.localizedDescription)
+                manager.processorDied(processor: self, reason: "\(error)")
             }
         } catch {
-            manager.processorDied(processor: self, reason: error.localizedDescription)
+            manager.processorDied(processor: self, reason: "\(error)")
         }
     }
 
@@ -116,7 +116,7 @@ public final class NIOSidekiqProcessor {
         return try self.dispatch.executeJob(workValue: workValue).flatMap { _ in
             return try self.fetcher.acknowledge(work)
         }.catchFlatMap{ error in
-            let reason = "Run perform error \(error.localizedDescription)"
+            let reason = "Run perform failed, error: \(error)"
             self.m.logger.error("\(self) process \(work) failed. reason: \(reason).")
             return try self.fetcher.requeue(work)
         }
